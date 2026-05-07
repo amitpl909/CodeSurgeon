@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codesurgeon-api
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONUNBUFFERED: 1
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-anthropic}
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      CACHE_TTL_GITHUB: ${CACHE_TTL_GITHUB:-86400}
+      CACHE_TTL_ANALYSIS: ${CACHE_TTL_ANALYSIS:-3600}
+      MOCK_LLM: ${MOCK_LLM:-false}
+      MOCK_GITHUB: ${MOCK_GITHUB:-false}
+    volumes:
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - codesurgeon
+
+networks:
+  codesurgeon:
+    driver: bridge

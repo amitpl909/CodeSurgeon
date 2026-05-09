@@ -226,9 +226,10 @@ async def get_analysis(analysis_id: str) -> Dict[str, Any]:
 
 
 @app.post("/api/v1/fixes")
-async def generate_fixes(bug_id: str, code: str) -> Dict[str, Any]:
+async def generate_fixes(request: AnalyzeRequest) -> Dict[str, Any]:
     """Generate fixes for a specific bug."""
     # Mock fix generation
+    code = request.code or ""
     return {
         "primary_fix": {
             "code": code.replace("||", "or"),

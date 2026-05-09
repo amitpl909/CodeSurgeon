@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background: #f8f9fa;
+}
+
+pre {
+  overflow-x: auto;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+textarea:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}

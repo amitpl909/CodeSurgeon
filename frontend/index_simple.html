@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeSurgeon - AI Bug Repair Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .severity-critical { @apply bg-red-100 border-red-300 text-red-800; }
+        .severity-high { @apply bg-orange-100 border-orange-300 text-orange-800; }
+        .severity-medium { @apply bg-yellow-100 border-yellow-300 text-yellow-800; }
+        .severity-low { @apply bg-green-100 border-green-300 text-green-800; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-6 shadow-lg">
+            <div class="max-w-7xl mx-auto px-4">
+                <h1 class="text-3xl font-bold">🔧 CodeSurgeon</h1>
+                <p class="text-blue-100 mt-1">AI-Powered GitHub Bug Repair Agent</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Status -->
+            <div id="statusDiv" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <p class="text-red-800" id="statusMsg"></p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Input Panel -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow p-6 sticky top-8">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">Analyze Code</h2>
+                        
+                        <!-- Language Select -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                            <select id="language" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="typescript">TypeScript</option>
+                                <option value="java">Java</option>
+                                <option value="go">Go</option>
+                                <option value="auto">Auto-detect</option>
+                            </select>
+                        </div>
+
+                        <!-- Code Input -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Code Snippet</label>
+                            <textarea id="codeInput" placeholder="Paste your code here..." class="w-full border border-gray-300 rounded px-3 py-2 h-64 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" disabled></textarea>
+                        </div>
+
+                        <!-- Analyze Button -->
+                        <button id="analyzeBtn" onclick="analyzeCode()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                            Analyze Code
+                        </button>
+
+                        <!-- Status -->
+                        <div id="loadingDiv" class="hidden mt-4 text-center">
+                            <div class="spinner inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                            <p class="text-sm text-gray-600 mt-2">Analyzing...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="lg:col-span-2">
+                    <!-- Summary -->
+                    <div id="summaryDiv" class="hidden bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Analysis Summary</h3>
+                        <div class="grid grid-cols-5 gap-4">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-gray-800" id="totalCount">0</p>
+                                <p class="text-sm text-gray-600">Total</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-red-600" id="criticalCount">0</p>
+                                <p class="text-sm text-gray-600">Critical</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-orange-600" id="highCount">0</p>
+                                <p class="text-sm text-gray-600">High</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-yellow-600" id="mediumCount">0</p>
+                                <p class="text-sm text-gray-600">Medium</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-green-600" id="lowCount">0</p>
+                                <p class="text-sm text-gray-600">Low</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4">Analysis Time: <span id="analysisTime">-</span> ms</p>
+                    </div>
+
+                    <!-- Bugs List -->
+                    <div id="bugsDiv" class="hidden">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Detected Bugs</h3>
+                        <div id="bugsList" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyDiv" class="bg-white rounded-lg shadow p-12 text-center">
+                        <p class="text-gray-500 text-lg">Enter code and click "Analyze Code" to get started</p>
+                    </div>
+
+                    <!-- Bug Detail -->
+                    <div id="detailDiv" class="hidden bg-white rounded-lg shadow p-6 mt-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Bug Details</h3>
+                        <div id="bugDetail"></div>
+                        
+                        <!-- Fix Section -->
+                        <div class="mt-6 pt-6 border-t">
+                            <button onclick="generateFixes()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition">
+                                🤖 Generate Fix
+                            </button>
+                            <div id="fixesDiv" class="mt-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let currentAnalysis = null;
+        let selectedBugId = null;
+
+        // Initialize
+        document.getElementById('codeInput').disabled = false;
+
+        async function analyzeCode() {
+            const code = document.getElementById('codeInput').value.trim();
+            const language = document.getElementById('language').value;
+
+            if (!code) {
+                showStatus('Please enter some code to analyze');
+                return;
+            }
+
+            const btn = document.getElementById('analyzeBtn');
+            const loading = document.getElementById('loadingDiv');
+            
+            btn.disabled = true;
+            loading.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_URL}/api/v1/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, language })
+                });
+
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                
+                currentAnalysis = await response.json();
+                displayResults();
+            } catch (error) {
+                showStatus(`Error: ${error.message}`);
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                loading.classList.add('hidden');
+            }
+        }
+
+        function displayResults() {
+            const bugs = currentAnalysis.bugs || [];
+            
+            // Update summary
+            const summary = document.getElementById('summaryDiv');
+            summary.classList.remove('hidden');
+            
+            const severityCounts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+            bugs.forEach(b => severityCounts[b.severity]++);
+            
+            document.getElementById('totalCount').textContent = bugs.length;
+            document.getElementById('criticalCount').textContent = severityCounts.CRITICAL;
+            document.getElementById('highCount').textContent = severityCounts.HIGH;
+            document.getElementById('mediumCount').textContent = severityCounts.MEDIUM;
+            document.getElementById('lowCount').textContent = severityCounts.LOW;
+            document.getElementById('analysisTime').textContent = currentAnalysis.analysis_time_ms;
+
+            // Display bugs list
+            const bugsDiv = document.getElementById('bugsDiv');
+            const bugsList = document.getElementById('bugsList');
+            bugsDiv.classList.remove('hidden');
+            bugsList.innerHTML = '';
+
+            bugs.forEach((bug, idx) => {
+                const severityClass = `severity-${bug.severity.toLowerCase()}`;
+                const emoji = bug.severity === 'CRITICAL' ? '🔴' : bug.severity === 'HIGH' ? '🟠' : bug.severity === 'MEDIUM' ? '🟡' : '🟢';
+                
+                const bugEl = document.createElement('div');
+                bugEl.className = `border rounded-lg p-4 cursor-pointer transition ${severityClass}`;
+                bugEl.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="font-bold">${emoji} ${bug.type}</p>
+                            <p class="text-sm mt-1">${bug.description}</p>
+                            <p class="text-xs mt-2 opacity-75">${bug.file}:${bug.line}</p>
+                        </div>
+                        <button onclick="selectBug(${idx})" class="ml-4 px-3 py-1 bg-white bg-opacity-50 rounded hover:bg-opacity-100">View</button>
+                    </div>
+                `;
+                bugsList.appendChild(bugEl);
+            });
+
+            document.getElementById('emptyDiv').classList.add('hidden');
+        }
+
+        function selectBug(idx) {
+            const bug = currentAnalysis.bugs[idx];
+            selectedBugId = bug.id;
+            
+            const detail = document.getElementById('detailDiv');
+            const bugDetail = document.getElementById('bugDetail');
+            
+            bugDetail.innerHTML = `
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-sm text-gray-600">Type</p>
+                        <p class="font-semibold">${bug.type}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Severity</p>
+                        <p class="font-semibold">${bug.severity}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">File</p>
+                        <p class="font-semibold">${bug.file}:${bug.line}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Description</p>
+                        <p class="font-semibold">${bug.description}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Confidence</p>
+                        <div class="w-full bg-gray-300 rounded h-2">
+                            <div class="bg-blue-600 h-2 rounded" style="width: ${bug.confidence * 100}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            detail.classList.remove('hidden');
+            document.getElementById('fixesDiv').innerHTML = '';
+        }
+
+        async function generateFixes() {
+            if (!selectedBugId) {
+                showStatus('Please select a bug first');
+                return;
+            }
+
+            const code = document.getElementById('codeInput').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/v1/fixes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bug_id: selectedBugId, code })
+                });
+
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                
+                const fixes = await response.json();
+                displayFixes(fixes);
+            } catch (error) {
+                showStatus(`Error generating fixes: ${error.message}`);
+            }
+        }
+
+        function displayFixes(fixes) {
+            const fixesDiv = document.getElementById('fixesDiv');
+            fixesDiv.innerHTML = '';
+
+            if (fixes.primary_fix) {
+                const primaryEl = document.createElement('div');
+                primaryEl.className = 'bg-green-50 border border-green-200 rounded-lg p-4 mb-4';
+                primaryEl.innerHTML = `
+                    <h4 class="font-bold text-green-800 mb-2">Primary Fix</h4>
+                    <pre class="bg-white p-3 rounded border border-green-200 text-sm overflow-x-auto"><code>${escapeHtml(fixes.primary_fix.code)}</code></pre>
+                    <p class="text-sm text-green-700 mt-2">${fixes.primary_fix.explanation}</p>
+                    <button onclick="copyToClipboard('${escapeHtml(fixes.primary_fix.code)}', this)" class="mt-3 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm">Copy</button>
+                `;
+                fixesDiv.appendChild(primaryEl);
+            }
+
+            if (fixes.alternatives && fixes.alternatives.length > 0) {
+                const altTitle = document.createElement('h4');
+                altTitle.className = 'font-bold text-gray-800 mb-3 mt-4';
+                altTitle.textContent = 'Alternative Solutions';
+                fixesDiv.appendChild(altTitle);
+
+                fixes.alternatives.forEach((alt, idx) => {
+                    const altEl = document.createElement('div');
+                    altEl.className = 'bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3';
+                    altEl.innerHTML = `
+                        <h5 class="font-semibold text-blue-800 mb-2">Option ${idx + 1}</h5>
+                        <pre class="bg-white p-3 rounded border border-blue-200 text-sm overflow-x-auto"><code>${escapeHtml(alt.code)}</code></pre>
+                        <p class="text-sm text-blue-700 mt-2">${alt.explanation}</p>
+                        <button onclick="copyToClipboard('${escapeHtml(alt.code)}', this)" class="mt-3 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Copy</button>
+                    `;
+                    fixesDiv.appendChild(altEl);
+                });
+            }
+        }
+
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const original = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = original, 2000);
+            });
+        }
+
+        function showStatus(msg) {
+            const statusDiv = document.getElementById('statusDiv');
+            const statusMsg = document.getElementById('statusMsg');
+            statusMsg.textContent = msg;
+            statusDiv.classList.remove('hidden');
+            setTimeout(() => statusDiv.classList.add('hidden'), 5000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Test API connection
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/health`);
+                if (!response.ok) throw new Error('API unreachable');
+                console.log('✓ Connected to CodeSurgeon API');
+            } catch (error) {
+                showStatus(`Cannot connect to API at ${API_URL}. Make sure backend is running: python simple_main.py`);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700">
+  <defs>
+    <style>
+      .box { fill: #e8f4f8; stroke: #0288d1; stroke-width: 2; }
+      .title { font-size: 16px; font-weight: bold; fill: #01579b; }
+      .label { font-size: 13px; fill: #333; }
+      .arrow { stroke: #0288d1; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .box-title { font-size: 14px; font-weight: bold; fill: #01579b; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#0288d1" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="500" y="30" text-anchor="middle" class="title" font-size="20">CodeSurgeon System Architecture</text>
+
+  <!-- Frontend -->
+  <rect x="50" y="80" width="180" height="80" class="box" rx="5"/>
+  <text x="140" y="105" text-anchor="middle" class="box-title">Frontend UI</text>
+  <text x="140" y="125" text-anchor="middle" class="label">HTML/Tailwind CSS</text>
+  <text x="140" y="145" text-anchor="middle" class="label">Interactive Dashboard</text>
+
+  <!-- API Layer -->
+  <rect x="320" y="80" width="180" height="80" class="box" rx="5"/>
+  <text x="410" y="105" text-anchor="middle" class="box-title">FastAPI Server</text>
+  <text x="410" y="125" text-anchor="middle" class="label">REST API Endpoints</text>
+  <text x="410" y="145" text-anchor="middle" class="label">Port 8000</text>
+
+  <!-- Code Analyzer -->
+  <rect x="50" y="250" width="160" height="80" class="box" rx="5"/>
+  <text x="130" y="275" text-anchor="middle" class="box-title">Code Analyzer</text>
+  <text x="130" y="295" text-anchor="middle" class="label">Pattern Detection</text>
+  <text x="130" y="315" text-anchor="middle" class="label">AST Parsing</text>
+
+  <!-- Bug Detector -->
+  <rect x="280" y="250" width="160" height="80" class="box" rx="5"/>
+  <text x="360" y="275" text-anchor="middle" class="box-title">Bug Detector</text>
+  <text x="360" y="295" text-anchor="middle" class="label">Static Analysis</text>
+  <text x="360" y="315" text-anchor="middle" class="label">Severity Scoring</text>
+
+  <!-- Fix Generator -->
+  <rect x="510" y="250" width="160" height="80" class="box" rx="5"/>
+  <text x="590" y="275" text-anchor="middle" class="box-title">Fix Generator</text>
+  <text x="590" y="295" text-anchor="middle" class="label">Code Generation</text>
+  <text x="590" y="315" text-anchor="middle" class="label">Alternatives</text>
+
+  <!-- LLM Client -->
+  <rect x="740" y="250" width="160" height="80" class="box" rx="5"/>
+  <text x="820" y="275" text-anchor="middle" class="box-title">LLM Client</text>
+  <text x="820" y="295" text-anchor="middle" class="label">Claude/OpenAI</text>
+  <text x="820" y="315" text-anchor="middle" class="label">API Interface</text>
+
+  <!-- GitHub Analyzer -->
+  <rect x="200" y="420" width="160" height="80" class="box" rx="5"/>
+  <text x="280" y="445" text-anchor="middle" class="box-title">GitHub Analyzer</text>
+  <text x="280" y="465" text-anchor="middle" class="label">PR Analysis</text>
+  <text x="280" y="485" text-anchor="middle" class="label">File Fetching</text>
+
+  <!-- Data Store -->
+  <rect x="500" y="420" width="160" height="80" class="box" rx="5"/>
+  <text x="580" y="445" text-anchor="middle" class="box-title">Data Layer</text>
+  <text x="580" y="465" text-anchor="middle" class="label">Test Data</text>
+  <text x="580" y="485" text-anchor="middle" class="label">Model Config</text>
+
+  <!-- External Services -->
+  <rect x="740" y="420" width="160" height="80" class="box" rx="5"/>
+  <text x="820" y="445" text-anchor="middle" class="box-title">External APIs</text>
+  <text x="820" y="465" text-anchor="middle" class="label">GitHub API</text>
+  <text x="820" y="485" text-anchor="middle" class="label">LLM APIs</text>
+
+  <!-- Arrows: Frontend to API -->
+  <path d="M 230 120 L 320 120" class="arrow"/>
+  <text x="275" y="110" class="label">HTTP</text>
+
+  <!-- Arrows: API to Components -->
+  <path d="M 410 160 L 130 250" class="arrow"/>
+  <path d="M 410 160 L 360 250" class="arrow"/>
+  <path d="M 410 160 L 590 250" class="arrow"/>
+  <path d="M 410 160 L 820 250" class="arrow"/>
+
+  <!-- Arrows: Components to GitHub Analyzer -->
+  <path d="M 130 330 L 280 420" class="arrow"/>
+  <path d="M 360 330 L 280 420" class="arrow"/>
+
+  <!-- Arrows: Components to Data -->
+  <path d="M 590 330 L 580 420" class="arrow"/>
+  <path d="M 820 330 L 580 420" class="arrow"/>
+
+  <!-- Arrows: To External APIs -->
+  <path d="M 580 500 L 740 460" class="arrow"/>
+  <path d="M 280 500 L 740 460" class="arrow"/>
+
+  <!-- Data Flow Legend -->
+  <text x="50" y="600" class="label" font-size="12">Data Flow:</text>
+  <text x="50" y="620" class="label" font-size="11">1. User submits code via frontend</text>
+  <text x="50" y="640" class="label" font-size="11">2. API routes to analyzers</text>
+  <text x="50" y="660" class="label" font-size="11">3. Bugs detected and fixes generated</text>
+
+  <text x="400" y="600" class="label" font-size="12">Components:</text>
+  <text x="400" y="620" class="label" font-size="11">• Modular, testable services</text>
+  <text x="400" y="640" class="label" font-size="11">• Mock LLM for dev/testing</text>
+  <text x="400" y="660" class="label" font-size="11">• Async API endpoints</text>
+
+  <text x="700" y="600" class="label" font-size="12">Tech Stack:</text>
+  <text x="700" y="620" class="label" font-size="11">• Python 3.11, FastAPI</text>
+  <text x="700" y="640" class="label" font-size="11">• Docker, pytest, Uvicorn</text>
+  <text x="700" y="660" class="label" font-size="11">• Claude/OpenAI integration</text>
+</svg>

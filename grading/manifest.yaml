@@ -1,0 +1,40 @@
+"""Grading manifest - defines reproducible environment and commit."""
+
+pinned_environment:
+  python_version: "3.11"
+  package_manager: "pip"
+  packages:
+    - "fastapi==0.110.0"
+    - "uvicorn==0.27.1"
+    - "pydantic==2.6.4"
+    - "anthropic==0.40.0"
+    - "loguru==0.7.2"
+    - "requests==2.31.0"
+    - "PyGithub==2.1.1"
+    - "python-dotenv==1.0.0"
+    - "openai==1.30.0"
+    - "pytest==8.1.1"
+    - "pytest-cov==5.0.0"
+    - "ruff==0.4.4"
+    - "black==24.4.2"
+    - "mypy==1.10.0"
+    - "locust==2.27.0"
+
+vcs:
+  system: "git"
+  commit_sha: "${COMMIT_SHA}"  # Set by grading system
+  branch: "main"
+
+reproducibility:
+  - make clean
+  - make install
+  - make preflight
+  - make lint
+  - make test
+  - make reproducibility_checks
+
+metadata:
+  created_date: "2026-05-07"
+  submission_version: "1.0.0"
+  course: "CS 6263 - NLP"
+  project_name: "CodeSurgeon"

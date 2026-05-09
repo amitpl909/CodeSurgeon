@@ -1,0 +1,94 @@
+"""Traceability mapping: User Stories -> Spec -> Implementation -> Tests."""
+
+traceability:
+  US-01:
+    spec_section: "API.analyze"
+    implemented_in:
+      - "src/myproject/api.py:analyze_code()"
+      - "src/myproject/code_analyzer.py:analyze()"
+      - "src/myproject/bug_detector.py:detect_bugs()"
+    tests:
+      - "tests/user_stories/test_us_01.py"
+      - "tests/unit/test_api.py::test_analyze_code_basic"
+      - "tests/integration/test_workflows.py::test_e2e_analyze_and_fix"
+
+  US-02:
+    spec_section: "API.fixes"
+    implemented_in:
+      - "src/myproject/api.py:generate_fixes()"
+      - "src/myproject/fix_generator.py:generate_fix()"
+    tests:
+      - "tests/user_stories/test_us_02.py"
+      - "tests/unit/test_fix_generator.py"
+
+  US-03:
+    spec_section: "ErrorHandling.invalid_input"
+    implemented_in:
+      - "src/myproject/api.py:analyze_code() - validation"
+    tests:
+      - "tests/user_stories/test_us_03.py"
+      - "tests/unit/test_api.py::test_analyze_empty_code"
+
+  US-04:
+    spec_section: "ErrorHandling.syntax_error"
+    implemented_in:
+      - "src/myproject/api.py:analyze_code() - error handling"
+    tests:
+      - "tests/user_stories/test_us_04.py"
+      - "tests/edge/test_edge_cases.py"
+
+  US-05:
+    spec_section: "API.analyze - PR mode"
+    implemented_in:
+      - "src/myproject/api.py:analyze_code() - pr_url path"
+      - "src/myproject/github_analyzer.py:analyze_pr()"
+    tests:
+      - "tests/user_stories/test_us_05.py"
+
+  US-06:
+    spec_section: "Frontend.clipboard"
+    implemented_in:
+      - "frontend/index.html - copy functionality"
+    tests:
+      - "tests/user_stories/test_us_06.py"
+
+  US-07:
+    spec_section: "ErrorHandling.timeout"
+    implemented_in:
+      - "src/myproject/api.py - timeout handling"
+      - "src/myproject/llm_client.py - retry logic"
+    tests:
+      - "tests/user_stories/test_us_07.py"
+
+  US-08:
+    spec_section: "API.response - metrics"
+    implemented_in:
+      - "src/myproject/api.py:AnalysisResult model"
+      - "src/myproject/api.py:analyze_code() - analysis_time_ms"
+    tests:
+      - "tests/user_stories/test_us_08.py"
+
+  US-09:
+    spec_section: "Configuration - optional GitHub token"
+    implemented_in:
+      - "src/myproject/api.py - optional github_token"
+      - "src/myproject/github_analyzer.py - token handling"
+    tests:
+      - "tests/user_stories/test_us_09.py"
+      - "tests/integration/test_workflows.py"
+
+test_coverage:
+  unit_tests: "tests/unit/"
+  integration_tests: "tests/integration/"
+  user_story_tests: "tests/user_stories/"
+  edge_case_tests: "tests/edge/"
+  load_tests: "tests/load/"
+
+  required_pass_rate: 100%
+  required_coverage: ≥70%
+
+grading_rubric:
+  application_functionality: 20  # Points for all 9 user stories passing
+  code_quality: 15  # Points for lint + type checking + test coverage
+  documentation: 10  # Points for SPEC.md, STORIES.md, README.md, etc.
+  reproducibility: 5   # Points for `make reproduce` passing
